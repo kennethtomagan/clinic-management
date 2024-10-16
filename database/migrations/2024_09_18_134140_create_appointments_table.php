@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('description');
             $table->string('status')->default('created');
             $table->date('date');
-            $table->float('fee');
+            $table->float('fee')->nullable();
             $table->foreignIdFor(Doctor::class, 'doctor_id');
             $table->foreignIdFor(Patient::class);
             $table->foreignIdFor(Slot::class);

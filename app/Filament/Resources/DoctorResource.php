@@ -5,160 +5,98 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\DoctorResource\Pages;
 use App\Filament\Resources\DoctorResource\RelationManagers;
 use App\Models\Doctor;
+use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Resources\Pages\ViewRecord;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class DoctorResource extends Resource
+class DoctorResource extends UserResource
 {
-    protected static ?string $model = Doctor::class;
+    protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-identification';
 
     protected static ?string $navigationGroup = 'Users';
 
+    protected static ?string $navigationLabel = 'Doctors';
+
+    public static ?string $label = 'Doctor';
+
     public static function form(Form $form): Form
     {
+        // Get the common fields from UserResource
+        $fields = UserResource::getFields();
+        $doctorFields = UserResource::getDoctorFields();
+
+        // Override the 'type' field
+        foreach ($fields as &$field) {
+            if ($field instanceof Forms\Components\Select && $field->getName() === 'type') {
+                $field = $field->default(User::DOCTOR_TYPE)
+                    ->disabled()
+                    ->dehydrated();
+            }
+        }
+
         return $form
             ->schema([
-                Forms\Components\Section::make('Personal Information')
-                    ->aside()
-                    ->description('Fill out the personal details of the doctor, including name, gender, and profile photo.')
-                    ->schema([
-                        Forms\Components\FileUpload::make('avatar_url')
-                            ->label('Photo')
-                            ->avatar()
-                            ->imageEditor()
-                            ->directory('doctors')
-                            ->rules('mimes:jpeg,png|max:1024'),
-
-                        Forms\Components\TextInput::make('first_name')
-                            ->maxLength(255)
-                            ->required(),
-
-                        Forms\Components\TextInput::make('last_name')
-                            ->maxLength(255)
-                            ->required(),
-
-                        Forms\Components\TextInput::make('middle_name')
-                            ->maxLength(255),
-                        Forms\Components\Select::make('gender')
-                            ->options([
-                                'Male' => 'Male',
-                                'Female' => 'Female',
-                                'Other' => 'Other',
-                            ])
-                            ->required(),
-
-                        Forms\Components\DatePicker::make('date_of_birth')
-                            ->maxDate('today')
-                            ->required(),
-
-                        Forms\Components\TextInput::make('title')
-                            ->placeholder('MD, DR, DPBO etc..')
-                            ->maxLength(255),
-
-                    ]),
-
-                Forms\Components\Section::make('Clinics')
-                    ->description('Select one or more clinics where the doctor is available for consultation.')
-                    ->aside()
-                    ->schema([
-                        Forms\Components\Select::make('clinic_id')
-                            ->relationship('clinics', 'name')
-                            ->multiple()
-                            ->preload()
-                            ->searchable(),
-                    ]),
-
-
-                Forms\Components\Section::make('Professional Experience')
-                    ->description('Provide the doctor\'s educational background, specialization, and years of experience.')
-                    ->aside()
-                    ->schema([
-
-                        Forms\Components\TextInput::make('education')
-                            ->maxLength(255)
-                            ->required(),
-
-                        Forms\Components\TextInput::make('specialization')
-                            ->placeholder('Ophthalmology')
-                            ->maxLength(255)
-                            ->required(),
-
-                        Forms\Components\TagsInput::make('subspecialty')
-                            ->placeholder('Eye Diseases, Vision Correction, Microsurgery of the Eye')
-                            ->helperText('Click enter to add new subspecialty.')
-                            ->separator(','),
-
-                        Forms\Components\TextInput::make('years_of_experience')
-                            ->numeric(),
-
-                        Forms\Components\Textarea::make('profile_description')
-                            ->label('Profile Description'),
-                        
-                    ]),
-                    
-                Forms\Components\Section::make('Contact Information')
-                    ->aside()
-                    ->description('Enter the doctor\'s contact details, including email and phone number.')
-                    ->aside()
-                    ->schema([
-                        Forms\Components\TextInput::make('email')
-                            ->label('Email address')
-                            ->required()
-                            ->email()
-                            ->maxLength(255)
-                            ->unique(ignoreRecord: true),
-
-                        Forms\Components\TextInput::make('phone_number')
-                            ->maxLength(255),
-
-                        Forms\Components\CheckboxList::make('consultation_availability')
-                            ->label('Consultation Availability')
-                            ->options([
-                                'in_person' => 'In-Person',
-                                'online' => 'online',
-                            ])
-                    ]),
-            ])
-            ->columns(3);
+                Forms\Components\Section::make()
+                    ->schema($fields),
+                Forms\Components\Section::make('Doctor Details')
+                    ->visible(fn (callable $get) => $get('type') === USER::DOCTOR_TYPE)
+                    ->relationship('doctorDetails')
+                    ->schema($doctorFields),
+                Forms\Components\Section::make('Password')
+                    ->schema(UserResource::getPasswordFields())
+                    ->visible(fn ($livewire) => !($livewire instanceof ViewRecord)),
+            ]);
+            
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
+
                 Tables\Columns\ImageColumn::make('avatar_url')
                     ->label('Avatar')
+                    ->getStateUsing(fn ($record) => $record->avatar_url ?? asset('images/avatar_placeholder.png'))
                     ->circular(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Full Name')
                     ->searchable(['first_name', 'last_name'])
                     ->sortable(['first_name', 'last_name']),
 
-                Tables\Columns\TextColumn::make('specialization')
+                Tables\Columns\TextColumn::make('email')
+                    ->label('Email')
+                    ->searchable()
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('doctorDetails.specialization')
                     ->label('Specialization')
                     ->searchable()
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('years_of_experience')
-                    ->label('Yrs of Experience')
+                Tables\Columns\TextColumn::make('doctorDetails.years_of_experience')
+                    ->label('Years of Experience')
                     ->searchable()
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('clinics.name')
-                    ->sortable()
-                    ->searchable()
-                    ->badge(),
             ])
             ->filters([
-                //
+                // Filter users where type is 'doctor'
+                \Filament\Tables\Filters\SelectFilter::make('type')
+                    ->default('doctor')
+                    ->query(fn ($query) => $query->where('type', 'doctor')),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -173,6 +111,13 @@ class DoctorResource extends Resource
                     Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ]);
+            
+        // return parent::table($table)->filters([
+        //     // Filter users where type is 'doctor'
+        //     \Filament\Tables\Filters\SelectFilter::make('type')
+        //         ->default('doctor')
+        //         ->query(fn ($query) => $query->where('type', 'doctor')),
+        // ]);
     }
 
     public static function getRelations(): array
@@ -187,6 +132,7 @@ class DoctorResource extends Resource
         return [
             'index' => Pages\ListDoctors::route('/'),
             'create' => Pages\CreateDoctor::route('/create'),
+            'view' => Pages\ViewDoctor::route('/{record}'),
             'edit' => Pages\EditDoctor::route('/{record}/edit'),
         ];
     }

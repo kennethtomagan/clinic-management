@@ -9,6 +9,7 @@ use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Slot;
+use App\Models\User;
 use App\Support\AvatarOptions;
 use Carbon\Carbon;
 use Filament\Forms;
@@ -47,8 +48,11 @@ class AppointmentResource extends Resource
                         ->required()
                         ->columnSpanFull()
                         ->getSearchResultsUsing(function (string $search) {
-                            $patient = Patient::where('first_name', 'like', "%{$search}%")
-                                ->orWhere('last_name', 'like', "%{$search}%")
+                            $patient = User::where('type', User::PATIENT_TYPE)
+                                ->where(function ($query) use ($search) {
+                                    $query->where('first_name', 'like', "%{$search}%")
+                                        ->orWhere('last_name', 'like', "%{$search}%");
+                                })
                                 ->limit(50)
                                 ->get();
                         
@@ -57,7 +61,7 @@ class AppointmentResource extends Resource
                             })->toArray();
                         })
                         ->options(function (): array {
-                            $patients = Patient::all();
+                            $patients = User::where('type', User::PATIENT_TYPE)->get();
 
                             return $patients->mapWithKeys(function ($patient) {
                                 return [$patient->getKey() => AvatarOptions::getOptionString($patient)];
@@ -83,11 +87,12 @@ class AppointmentResource extends Resource
                         ->label('Doctor')
                         ->allowHtml()
                         ->options(function (Get $get) {
-                            $doctors = Doctor::whereHas('schedules', function (Builder $query) use ($get) {
+                            $doctors = User::where('type', User::DOCTOR_TYPE)
+                                ->whereHas('schedules', function (Builder $query) use ($get) {
                                     $dayOfTheWeek = Carbon::parse($get('date'))->dayOfWeek;
                                     $query
-                                        ->where('day_of_week', $dayOfTheWeek)
-                                        ->where('clinic_id', $get('clinic_id'));
+                                        ->where('clinic_id', $get('clinic_id'))
+                                        ->where('day_of_week', $dayOfTheWeek);
 
                                 })
                                 ->get();
@@ -113,7 +118,7 @@ class AppointmentResource extends Resource
                         ->label('Slot')
                         ->required()
                         ->options(function (Get $get) {
-                            $doctor = Doctor::find($get('doctor_id'));
+                            $doctor = User::find($get('doctor_id'));
                             $dayOfTheWeek = Carbon::parse($get('date'))->dayOfWeek;
                             $clinicId = $get('clinic_id');
                             
@@ -136,12 +141,12 @@ class AppointmentResource extends Resource
                         ->native(false)
                         ->options(AppointmentStatus::class)
                         ->visibleOn(Pages\EditAppointment::class),
-                    Forms\Components\TextInput::make('fee')
-                        ->label('Fee')
-                        ->numeric() 
-                        ->prefix('₱')
-                        ->placeholder('0.00') 
-                        ->rules(['required', 'numeric', 'min:0']),
+                    // Forms\Components\TextInput::make('fee')
+                    //     ->label('Fee')
+                    //     ->numeric() 
+                    //     ->prefix('₱')
+                    //     ->placeholder('0.00') 
+                    //     ->rules(['required', 'numeric', 'min:0']),
                 ])
             ]);
     }

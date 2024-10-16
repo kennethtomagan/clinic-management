@@ -9,6 +9,7 @@ use App\Models\Clinic;
 use App\Models\Doctor;
 use App\Models\Schedule;
 use App\Models\Slot;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -48,15 +49,13 @@ class ScheduleResource extends Resource
                     
                             // Return an empty array if no clinic_id is selected
                             if (!$clinicId) {
-                                return [];
+                                $query = User::where('type', User::DOCTOR_TYPE);
+                            } else {
+                                $query = Clinic::find($clinicId)?->doctors();
                             }
 
                             // Fetch doctors related to the selected clinic
-                            return Clinic::find($clinicId)
-                                ?->doctors()
-                                ->get()
-                                ->pluck('name', 'id')
-                                ->toArray() ?? [];
+                            return $query->get()->pluck('name', 'id')->toArray() ?? [];
                         })
                         ->required()
                         ->live(),

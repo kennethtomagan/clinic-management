@@ -24,7 +24,8 @@ class Clinic extends Model
 
     public function doctors(): BelongsToMany
     {
-        return $this->belongsToMany(Doctor::class);
+        return $this->belongsToMany(User::class, 'doctor_details')
+                    ->where('type', 'doctor');
     }
 
     public function schedules(): BelongsToMany
@@ -32,4 +33,8 @@ class Clinic extends Model
         return $this->belongsToMany(Schedule::class);
     }
 
+    public function doctorDetails()
+    {
+        return $this->hasMany(DoctorDetail::class, 'clinic_id');
+    }
 }

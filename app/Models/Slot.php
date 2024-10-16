@@ -43,7 +43,7 @@ class Slot extends Model
         );
     }
 
-    public function scopeAvailableFor(Builder $query, Doctor $doctor, int $dayOfTheWeek, int $clinicId): void
+    public function scopeAvailableFor(Builder $query, User $doctor, int $dayOfTheWeek, int $clinicId): void
     {
         $query->whereHas('schedule', function (Builder $query) use ($doctor, $dayOfTheWeek, $clinicId) {
             $query
