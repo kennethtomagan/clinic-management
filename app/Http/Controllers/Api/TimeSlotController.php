@@ -22,14 +22,16 @@ class TimeSlotController extends Controller
     {
         $date = $request->input('date');
         $dayOfWeek = Carbon::parse($date)->dayOfWeek;
-        $slots = null;
+        $slots = [];
         $schedule = Schedule::where('day_of_week', $dayOfWeek)
             ->where('clinic_id', $request->clinic_id)
             ->where('doctor_id', $request->doctor_id)
             ->first();
+
         if ($schedule) {
             $slots = $schedule->slots;
         }
+
         return TimeSlotResource::collection($slots);
     }
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClinicController;
 use App\Http\Controllers\Api\DoctorController;
@@ -24,4 +25,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/doctors', [DoctorController::class, 'index']);
     Route::get('/doctors/available-doctors', [DoctorController::class, 'availableDoctors']);
     Route::get('/time-slot', [TimeSlotController::class, 'index']);
+    Route::post('/book-appointment', [AppointmentController::class, 'store']);
 });

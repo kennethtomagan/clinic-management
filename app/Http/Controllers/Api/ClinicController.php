@@ -23,17 +23,4 @@ class ClinicController extends Controller
         $clinics = Clinic::all();
         return ApiClinicResource::collection($clinics);
     }
-
-    /**
-     * Return List of clinic doctors
-     * 
-     * @param Request $request
-     * @return DoctorResource 
-     */
-    public function clinicDoctors(Request $request, Clinic $clinic)
-    {
-        $doctors = $clinic->doctors;
-        dd($doctors );
-        return DoctorResource::collection($doctors);
-    }
 }

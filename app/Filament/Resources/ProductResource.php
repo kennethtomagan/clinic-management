@@ -35,6 +35,7 @@ class ProductResource extends Resource
                             ->schema([
                                 Forms\Components\TextInput::make('name')
                                     ->required()
+                                    ->label('Product Name')
                                     ->maxLength(255)
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(function (string $operation, $state, Forms\Set $set) {
@@ -151,7 +152,7 @@ class ProductResource extends Resource
                     ->collection('product-images'),
 
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Name')
+                    ->label('Product Name')
                     ->searchable()
                     ->sortable(),
                     
@@ -175,18 +176,6 @@ class ProductResource extends Resource
                     ->label('Price')
                     ->searchable()
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('sku')
-                    ->label('SKU')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(),
-
-                Tables\Columns\TextColumn::make('qty')
-                    ->label('Quantity')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(),
 
                 Tables\Columns\TextColumn::make('security_stock')
                     ->searchable()
