@@ -64,6 +64,7 @@ class ProductResource extends Resource
                                     ->collection('product-images')
                                     ->multiple()
                                     ->maxFiles(5)
+                                    ->directory('product')
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/gif']) 
                                     ->hiddenLabel(),
                             ])

@@ -12,7 +12,14 @@ use Illuminate\Support\Str;
 
 class AppointmentController extends Controller
 {
-    
+    public function index(Request $request)
+    {
+        $appointment = Appointment::where('patient_id', $request->user()->id)
+            ->with('slot', 'doctor', 'clinic')
+            ->get();
+        return AppointmentResource::collection($appointment);
+    }
+
     public function store(StoreAppointmentRequest $request)
     {
         $appointment = Appointment::where('date', $request->date)

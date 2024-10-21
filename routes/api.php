@@ -26,4 +26,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/doctors/available-doctors', [DoctorController::class, 'availableDoctors']);
     Route::get('/time-slot', [TimeSlotController::class, 'index']);
     Route::post('/book-appointment', [AppointmentController::class, 'store']);
+    Route::get('/appointments', [AppointmentController::class, 'index']);
 });
