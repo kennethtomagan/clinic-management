@@ -8,39 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Patient extends Model
+class Patient extends User
 {
-    use HasFactory, SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'first_name',
-        'last_name',
-        'gender',
-        'date_of_birth',
-        'email',
-        'phone',
-        'avatar_url',
-        'address',
-    ];
-    
-    // /**
-    //  * Get the doctor full name
-    //  */
-    // protected function fullName(): Attribute
-    // {
-    //     return Attribute::make(
-    //         get: fn () => $this->first_name .' ' . $this->last_name
-    //     );
-    // }
+    protected $table = 'users';
 
-    public function appointments(): HasMany
+    // You can define a global scope to filter by 'type'
+    protected static function booted()
     {
-        return $this->hasMany(Appointment::class);
+        static::addGlobalScope('patient', function ($query) {
+            $query->where('type', 'patient');
+        });
     }
-
 }

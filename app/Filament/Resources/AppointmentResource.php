@@ -134,19 +134,32 @@ class AppointmentResource extends Resource
                             }
 
                             return '';
+                        })
+                        ->rule(function (Get $get) {
+                            return [
+                                'required',
+                                function (string $attribute, $value, $fail) use ($get) {
+                                    $date = $get('date');
+                                    $slotId = $value;
+                                    
+                                    // Check if there's an existing appointment with the same date and slot_id
+                                    $exists = Appointment::where('date', $date)
+                                        ->where('slot_id', $slotId)
+                                        ->exists();
+
+                                    if ($exists) {
+                                        $fail('The selected slot is already booked for the chosen date.');
+                                    }
+                                },
+                            ];
                         }),
                     Forms\Components\TextInput::make('description')
+                        ->label('Reason for booking')
                         ->required(),
                     Forms\Components\Select::make('status')
                         ->native(false)
                         ->options(AppointmentStatus::class)
                         ->visibleOn(Pages\EditAppointment::class),
-                    // Forms\Components\TextInput::make('fee')
-                    //     ->label('Fee')
-                    //     ->numeric() 
-                    //     ->prefix('₱')
-                    //     ->placeholder('0.00') 
-                    //     ->rules(['required', 'numeric', 'min:0']),
                 ])
             ]);
     }
@@ -155,12 +168,12 @@ class AppointmentResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('patient.avatar_url')
+                    ->label(' ')
+                    ->getStateUsing(fn ($record) => $record->patient->avatar_url ?? asset('images/avatar_placeholder.png'))
+                    ->circular(),
                 Tables\Columns\TextColumn::make('patient.name')
                     ->label('Patient')
-                    ->searchable()
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('description')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('doctor.name')
@@ -192,7 +205,7 @@ class AppointmentResource extends Resource
                         $record->status = AppointmentStatus::Confirmed;
                         $record->save();
                     })
-                    ->visible(fn (Appointment $record) => $record->status == AppointmentStatus::Created)
+                    ->visible(fn (Appointment $record) => $record->status == AppointmentStatus::Pending)
                     ->color('success')
                     ->icon('heroicon-o-check'),
                 Tables\Actions\Action::make('Cancel')

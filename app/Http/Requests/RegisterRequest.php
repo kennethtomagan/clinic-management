@@ -28,9 +28,27 @@ class RegisterRequest extends FormRequest
             'password' => 'required',
             'confirm_password' => 'required|same:password',
             'gender' => 'required',
-            'date_of_birth' => 'required',
+            'date_of_birth' => [
+                'required',
+                'date',
+                'before:' . now()->subYears(5)->format('Y-m-d'),
+            ],
             'phone' => 'required',
-            'address' => 'max:255',
+            'address' => 'required|max:255',
+        ];
+    }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'date_of_birth.required' => 'The date of birth is required.',
+            'date_of_birth.date' => 'The date of birth must be a valid date.',
+            'date_of_birth.before' => 'The date of birth must be at least 5 years ago.',
         ];
     }
 }

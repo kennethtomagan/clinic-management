@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\DoctorStatus;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
@@ -156,13 +157,24 @@ class UserResource extends Resource
                 ->label('Clinic')
                 ->required(),
 
+            // Forms\Components\Select::make('status')
+            //     ->options([
+            //         User::STATUS_ACTIVE => 'Active',
+            //         User::STATUS_LEAVE => 'Leave',
+            //         User::STATUS_RESIGNED => 'Resigned',
+            //     ]),
 
-            Forms\Components\CheckboxList::make('consultation_availability')
-                ->label('Consultation Availability')
-                ->options([
-                    'in_person' => 'In-Person',
-                    'online' => 'online',
-                ]),
+
+            Forms\Components\ToggleButtons::make('status')
+                ->inline()
+                ->options(DoctorStatus::class)
+                ->required(),
+            // Forms\Components\CheckboxList::make('consultation_availability')
+            //     ->label('Consultation Availability')
+            //     ->options([
+            //         'in_person' => 'In-Person',
+            //         'online' => 'online',
+            //     ]),
 
             Forms\Components\Textarea::make('profile_description')
                 ->label('Profile Description'),

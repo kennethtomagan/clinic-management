@@ -40,6 +40,11 @@ class User extends Authenticatable implements FilamentUser
     PUBLIC CONST DOCTOR_TYPE = 'doctor';
     PUBLIC CONST RECEPTIONIST_TYPE = 'receptionist';
 
+
+    PUBLIC CONST STATUS_ACTIVE = 'active';
+    PUBLIC CONST STATUS_LEAVE = 'leave';
+    PUBLIC CONST STATUS_RESIGNED = 'resigned';
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -90,6 +95,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Schedule::class, 'doctor_id');
     }
 
+    public function doctorDetail(): HasOne
+    {
+        return $this->hasOne(DoctorDetail::class, 'user_id');
+    }
+    
     /**
      * Check if the user is an admin.
      *
@@ -109,4 +119,6 @@ class User extends Authenticatable implements FilamentUser
     {
         return in_array($this->type, [self::ADMIN_TYPE, self::RECEPTIONIST_TYPE]);
     }
+
+
 }

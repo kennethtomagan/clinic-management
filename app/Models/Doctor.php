@@ -12,42 +12,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Doctor extends Model
 {
-    use HasFactory, SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'first_name',
-        'last_name',
-        'middle_name',
-        'title',
-        'specialization',
-        'subspecialty',
-        'gender',
-        'date_of_birth',
-        'email',
-        'phone_number',
-        'profile_description',
-        'education',
-        'years_of_experience',
-        'available_in_person',
-        'available_online',
-        'avatar_url',
-        'clinic_id'
-    ];
-    
-    public function clinics(): BelongsToMany
+    protected $table = 'users';
+
+    // You can define a global scope to filter by 'type'
+    protected static function booted()
     {
-        return $this->belongsToMany(Clinic::class);
+        static::addGlobalScope('patient', function ($query) {
+            $query->where('type', 'doctor');
+        });
     }
-
-
-    public function schedules(): HasMany
-    {
-        return $this->hasMany(Schedule::class, 'doctor_id');
-    }
-
 }

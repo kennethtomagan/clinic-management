@@ -46,12 +46,12 @@ class Appointment extends Model
 
     public function patient(): BelongsTo
     {
-        return $this->belongsTo(Patient::class, 'patient_id');
+        return $this->belongsTo(User::class, 'patient_id');
     }
 
     public function scopeNew(Builder $query): void
     {
-        $query->whereStatus(AppointmentStatus::Created);
+        $query->whereStatus(AppointmentStatus::Pending);
     }
 
 }

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Appointment;
+use App\Models\Clinic;
 use App\Models\Doctor;
 use App\Models\Patient;
 use Illuminate\Support\ServiceProvider;
@@ -31,8 +32,12 @@ class AppServiceProvider extends ServiceProvider
                 ->column('name')
         ]);
         FilamentInvoices::registerFrom([
+            InvoiceFrom::make(Clinic::class)
+                ->label('Clinic')
+                ->column('name'),
             InvoiceFrom::make(Doctor::class)
                 ->label('Doctor')
+                ->column('name'),
         ]);
     }
 }

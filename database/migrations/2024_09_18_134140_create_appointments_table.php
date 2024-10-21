@@ -19,7 +19,7 @@ return new class extends Migration
             $table->id();
             $table->string('appointment_id')->unique();
             $table->string('description');
-            $table->string('status')->default('created');
+            $table->string('status')->default('pending');
             $table->date('date');
             $table->float('fee')->nullable();
             $table->foreignIdFor(Doctor::class, 'doctor_id');

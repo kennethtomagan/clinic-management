@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('specialization')->nullable();
             $table->string('subspecialty')->nullable();
             $table->integer('years_of_experience')->nullable();
-            $table->json('consultation_availability')->nullable();
+            $table->string('status')->default(User::STATUS_ACTIVE);
             $table->longText('profile_description')->nullable();
             $table->timestamps();
             $table->softDeletes(); 

@@ -12,10 +12,6 @@ class DoctorDetail extends Model
 
     protected $table = 'doctor_details';
 
-    protected $casts = [
-        'consultation_availability' => 'array',
-    ];
-    
     protected $fillable = [
         'clinic_id',
         'user_id',
@@ -23,8 +19,8 @@ class DoctorDetail extends Model
         'specialization',
         'subspecialty',
         'years_of_experience',
-        'consultation_availability',
-        'profile_description'
+        'profile_description',
+        'status'
     ];
 
     // Relationship with User model

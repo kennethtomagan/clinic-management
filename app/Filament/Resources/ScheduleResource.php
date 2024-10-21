@@ -10,6 +10,7 @@ use App\Models\Doctor;
 use App\Models\Schedule;
 use App\Models\Slot;
 use App\Models\User;
+use App\Support\AvatarOptions;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -41,21 +42,30 @@ class ScheduleResource extends Resource
                         ->live()
                         ->afterStateUpdated(fn (Set $set) => $set('doctor_id', null)),
                     Forms\Components\Select::make('doctor_id')
-                        ->native(false)
-                        ->label('Doctor')
-                        ->options(function (Get $get): array|Collection {
-                            // Get the selected clinic_id
-                            $clinicId = $get('clinic_id');
-                    
-                            // Return an empty array if no clinic_id is selected
-                            if (!$clinicId) {
-                                $query = User::where('type', User::DOCTOR_TYPE);
-                            } else {
-                                $query = Clinic::find($clinicId)?->doctors();
-                            }
+                        // ->native(false)
 
-                            // Fetch doctors related to the selected clinic
-                            return $query->get()->pluck('name', 'id')->toArray() ?? [];
+                        ->allowHtml()
+                        ->searchable()
+                        ->label('Doctor')
+                        ->getSearchResultsUsing(function (string $search) {
+                            $patient = User::where('type', User::DOCTOR_TYPE)
+                                ->where(function ($query) use ($search) {
+                                    $query->where('first_name', 'like', "%{$search}%")
+                                        ->orWhere('last_name', 'like', "%{$search}%");
+                                })
+                                ->limit(50)
+                                ->get();
+                        
+                            return $patient->mapWithKeys(function ($patient) {
+                                    return [$patient->getKey() => AvatarOptions::getOptionString($patient)];
+                            })->toArray();
+                        })
+                        ->options(function (): array {
+                            $patients = User::where('type', User::DOCTOR_TYPE)->get();
+
+                            return $patients->mapWithKeys(function ($patient) {
+                                return [$patient->getKey() => AvatarOptions::getOptionString($patient)];
+                            })->toArray();
                         })
                         ->required()
                         ->live(),
@@ -64,6 +74,9 @@ class ScheduleResource extends Resource
                         ->native(false)
                         ->required(),
                     Forms\Components\Repeater::make('slots')
+                        ->label('Available slot (1 per Appointment)')
+                        ->helperText('Please define the start and end times for each slot.')
+                        ->createItemButtonLabel('Add more slot')
                         ->relationship()
                         ->schema([
                             Forms\Components\TimePicker::make('start')
