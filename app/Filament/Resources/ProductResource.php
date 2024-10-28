@@ -198,28 +198,8 @@ class ProductResource extends Resource
                 //
             ])
             ->actions([
-                // Tables\Actions\ViewAction::make(),
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-                Action::make('printBarcode')
-                ->label('Print Barcode')
-                ->action(function ($record) {
-                    $barcode = (new DNS1D())->getBarcodePNG($record->barcode, 'C39');
-                    
-                    return view('filament.resources.products.print-barcode', [
-                        'barcode' => $barcode,
-                        'product' => $record,
-                    ]);
-                })
-                ->icon('heroicon-o-printer')
-                ->color('primary')
-                ->modalWidth('md')
-                ->modalHeading('Print Barcode')
-                ->modalSubheading('Print the barcode for this product.')
-                ->form([]) // No form needed
-                ->modalContent(fn ($record) => view('filament.resources.products.print-barcode', [
-                    'barcode' => (new DNS1D())->getBarcodePNG($record->barcode, 'C39'),
-                    'product' => $record,
-                ])),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
