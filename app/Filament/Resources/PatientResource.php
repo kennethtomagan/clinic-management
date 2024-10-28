@@ -6,6 +6,7 @@ use App\Filament\Resources\PatientResource\Pages;
 use App\Filament\Resources\PatientResource\RelationManagers;
 use App\Models\Patient;
 use App\Models\User;
+use Filament\Tables\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\ViewRecord;
@@ -14,6 +15,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class PatientResource extends UserResource
 {
@@ -60,7 +63,23 @@ class PatientResource extends UserResource
             \Filament\Tables\Filters\SelectFilter::make('type')
                 ->default('patient')
                 ->query(fn ($query) => $query->where('type', 'patient')),
-        ]);
+        ])
+        // ->actions([
+        //     Action::make('downloadPDF')
+        //         ->label('Download ID Card')
+        //         // ->icon('heroicon-s-download')
+        //         ->color('success')
+        //         ->action(function ($record) {
+        //             $pdf = PDF::loadView('patient.user-card', ['user' => $record]);
+        //             return response()->streamDownload(
+        //                 fn () => print($pdf->output()),
+        //                 'user-id-card.pdf'
+        //             );
+        //         })
+        //         ->requiresConfirmation()
+        //         ->tooltip('Download the user ID card as a PDF'),
+        // ])
+        ;
     }
 
     public static function getRelations(): array

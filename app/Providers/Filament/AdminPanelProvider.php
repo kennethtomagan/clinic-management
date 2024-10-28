@@ -40,7 +40,7 @@ class AdminPanelProvider extends PanelProvider
                 Widgets\AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
             ])
-            ->plugin(\TomatoPHP\FilamentInvoices\FilamentInvoicesPlugin::make())
+            // ->plugin(\TomatoPHP\FilamentInvoices\FilamentInvoicesPlugin::make())
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

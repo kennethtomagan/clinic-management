@@ -2,11 +2,10 @@
 
 namespace App\Filament\Resources;
 
+use App\Exports\ProductsExport;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Product;
-// use Filament\Actions\Action;
-
 use Filament\Tables\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -18,6 +17,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 use Milon\Barcode\DNS1D;
+use Filament\Tables\Actions\BulkAction;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductResource extends Resource
 {
@@ -167,7 +170,7 @@ class ProductResource extends Resource
                     ->label('Barcode')
                     ->formatStateUsing(function ($record) {
                         $barcode = new DNS1D();
-                        $productBarcode = $barcode->getBarcodeHTML($record->barcode, 'PHARMA');
+                        $productBarcode = $barcode->getBarcodeHTML($record->barcode, 'C39');
                         $productBarcode = $productBarcode . '<div class="w-full text-center"><span>'. $record->barcode ."</span></div>";
                         return $productBarcode;
                     })
@@ -221,6 +224,38 @@ class ProductResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    BulkAction::make('print_barcode')
+                        ->label('Print Barcode')
+                        ->action(function (Collection $records) {
+                            $barcodes = [];
+
+                            foreach ($records as $record) {
+                                $productBarcode = (new DNS1D())->getBarcodePNG($record->barcode, 'C39');
+                                $barcodes[] = [
+                                    'barcode' => $productBarcode,
+                                    'label' => $record->barcode
+                                ];
+                            }
+
+                            // Generate PDF with all barcodes
+                            $pdf = PDF::loadView('product.barcode', compact('barcodes'));
+
+                            // Return PDF as a downloadable response
+                            return response()->streamDownload(function () use ($pdf) {
+                                echo $pdf->stream();
+                            }, 'barcodes.pdf');
+                        })
+                        ->requiresConfirmation()
+                        ->icon('heroicon-o-printer'),
+
+                    BulkAction::make('export')
+                        ->label('Export')
+                        ->action(function () {
+                            // Generate and download the Excel file
+                            return Excel::download(new ProductsExport, 'products.xlsx');
+                        })
+                        ->requiresConfirmation()
+                        ->icon('heroicon-o-arrow-down-tray'),
                 ]),
             ]);
     }

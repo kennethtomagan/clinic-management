@@ -10,6 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements FilamentUser
@@ -120,5 +121,23 @@ class User extends Authenticatable implements FilamentUser
         return in_array($this->type, [self::ADMIN_TYPE, self::RECEPTIONIST_TYPE]);
     }
 
+    public function getAvarUrl($pdf = false)
+    {
+        if ($this->avatar_url && Storage::disk('public')->exists($this->avatar_url)) {
+            $path = Storage::disk('public')->path($this->avatar_url); // Get the local path
+    
+            if ($pdf) {
+                $imageData = base64_encode(file_get_contents($path)); // Reads from the local path
+                $mimeType = mime_content_type($path);
+    
+                return 'data:' . $mimeType . ';base64,' . $imageData;
+            } else {
+                return url(Storage::url($this->avatar_url)); // Full URL for web display
+            }
+        }
+    
+        // Fallback URL if avatar_url is not set or the file does not exist
+        return url('images/avatar_placeholder.png'); 
+    }
 
 }
