@@ -35,6 +35,7 @@ class PatientResource extends UserResource
         // Get the common fields from UserResource
         $fields = UserResource::getFields();
         $passwordFields = UserResource::getPasswordFields();
+        $rfidField = UserResource::getRfidField();
 
         // Override the 'type' field
         foreach ($fields as &$field) {
@@ -49,6 +50,10 @@ class PatientResource extends UserResource
             ->schema([
                 Forms\Components\Section::make()
                     ->schema($fields),
+                Forms\Components\Section::make('RFID')
+                    ->description('If the patient has an RFID card, please scan it on the RFID reader to retrieve the RFID #')
+                    ->schema($rfidField)
+                    ->visible(fn (callable $get) => $get('type') === 'patient'),
                 Forms\Components\Section::make('Password')
                     ->schema($passwordFields)
                     ->visible(fn ($livewire) => !($livewire instanceof ViewRecord)),

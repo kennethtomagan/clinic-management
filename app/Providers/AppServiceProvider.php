@@ -26,18 +26,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // FilamentInvoices::registerFor([
-        //     InvoiceFor::make(Patient::class)
-        //         ->label('Patient')
-        //         ->column('name')
-        // ]);
-        // FilamentInvoices::registerFrom([
-        //     InvoiceFrom::make(Clinic::class)
-        //         ->label('Clinic')
-        //         ->column('name'),
-        //     InvoiceFrom::make(Doctor::class)
-        //         ->label('Doctor')
-        //         ->column('name'),
-        // ]);
+        //
     }
 }

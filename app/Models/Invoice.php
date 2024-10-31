@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use TomatoPHP\FilamentLocations\Models\Currency;
 use TomatoPHP\FilamentTypes\Models\Type;
@@ -200,4 +201,10 @@ class Invoice extends Model
     {
         return $this->hasMany(InvoiceLog::class);
     }
+
+    public function rfidPoints(): HasMany
+    {
+        return $this->hasMany(PatientRfidPoint::class, 'invoice_id');
+    }
+
 }

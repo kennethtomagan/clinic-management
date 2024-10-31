@@ -33,5 +33,6 @@ class CreateInvoice extends CreateRecord
             'log' => "Invoice created By: " . auth()->user()->name,
             'type' => 'created'
         ]);
+
     }
 }

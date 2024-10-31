@@ -49,6 +49,11 @@ class Appointment extends Model
         return $this->belongsTo(User::class, 'patient_id');
     }
 
+    public function logs()
+    {
+        return $this->hasMany(AppointmentLog::class);
+    }
+
     public function scopeNew(Builder $query): void
     {
         $query->whereStatus(AppointmentStatus::Pending);

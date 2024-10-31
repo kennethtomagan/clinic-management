@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->text('address')->nullable();
             $table->string('avatar_url')->nullable();
+            $table->bigInteger('rfid_number')->nullable();
             $table->string('name')->virtualAs('concat(first_name, \' \', last_name)');
             $table->rememberToken();
             $table->timestamps();

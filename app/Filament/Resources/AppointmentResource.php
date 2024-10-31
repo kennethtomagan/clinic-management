@@ -6,6 +6,7 @@ use App\Enums\AppointmentStatus;
 use App\Filament\Resources\AppointmentResource\Pages;
 use App\Filament\Resources\AppointmentResource\RelationManagers;
 use App\Models\Appointment;
+use App\Models\AppointmentLog;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Slot;
@@ -204,6 +205,10 @@ class AppointmentResource extends Resource
                 Tables\Actions\Action::make('Confirm')
                     ->action(function (Appointment $record) {
                         $record->status = AppointmentStatus::Confirmed;
+                        $record->logs()->create([
+                            'type' => $record->status,
+                            'log' => 'Appointment confirmed By: ' . auth()->user()->name,
+                        ]);
                         $record->save();
                     })
                     ->visible(fn (Appointment $record) => $record->status == AppointmentStatus::Pending)
@@ -212,6 +217,11 @@ class AppointmentResource extends Resource
                 Tables\Actions\Action::make('Cancel')
                     ->action(function (Appointment $record) {
                         $record->status = AppointmentStatus::Canceled;
+
+                        $record->logs()->create([
+                            'type' => $record->status,
+                            'log' => 'Appointment cancelled By: ' . auth()->user()->name,
+                        ]);
                         $record->save();
                     })
                     ->visible(fn (Appointment $record) => $record->status != AppointmentStatus::Canceled)

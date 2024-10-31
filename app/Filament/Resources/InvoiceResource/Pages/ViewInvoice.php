@@ -4,6 +4,7 @@ namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use App\Filament\Resources\InvoiceResource;
 use App\Models\Invoice;
+use App\Models\PatientRfidPoint;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions;
 use Filament\Forms;
@@ -55,8 +56,27 @@ class ViewInvoice extends ViewRecord
                         ->label(trans('messages.invoices.actions.amount'))
                         ->required()
                         ->numeric(),
+
+                    Forms\Components\Toggle::make('use_rfid')
+                        ->label('Retrieve points?')
+                        ->reactive(),
+
+                    Forms\Components\TextInput::make('points_rfid_number')
+                        ->label('RFID number')
+                        ->extraAttributes([
+                            'onkeydown' => "if(event.key === 'Enter'){ event.preventDefault(); }"
+                        ])
+                        ->visible(fn ($get) => $get('use_rfid')),
                 ])
                 ->action(function (array $data, Invoice $record) {
+
+                    $record->rfidPoints()->create([
+                        'user_id' => $record->for_id,
+                        'rfid_number' => $data['points_rfid_number'], 
+                        'points' =>  $data['amount'] / 100,
+                        'status' => PatientRfidPoint::STATUS_ACTIVE
+                    ]);
+
                     $record->update([
                         'paid' => $record->paid + $data['amount']
                     ]);

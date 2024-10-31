@@ -37,6 +37,7 @@ class ScheduleResource extends Resource
                 Forms\Components\Section::make([
                     Forms\Components\Select::make('clinic_id')
                         ->relationship('clinic', 'name')
+                        ->required()
                         ->preload()
                         ->searchable()
                         ->live()

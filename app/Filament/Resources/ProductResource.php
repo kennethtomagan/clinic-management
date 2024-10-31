@@ -80,11 +80,11 @@ class ProductResource extends Resource
                                     ->rules(['regex:/^\d{1,6}(\.\d{0,2})?$/'])
                                     ->required(),
 
-                                Forms\Components\TextInput::make('old_price')
-                                    ->label('Compare at price')
-                                    ->numeric()
-                                    ->rules(['regex:/^\d{1,6}(\.\d{0,2})?$/'])
-                                    ->required(),
+                                // Forms\Components\TextInput::make('old_price')
+                                //     ->label('Compare at price')
+                                //     ->numeric()
+                                //     ->rules(['regex:/^\d{1,6}(\.\d{0,2})?$/'])
+                                //     ->required(),
 
                                 Forms\Components\TextInput::make('cost')
                                     ->label('Cost per item')

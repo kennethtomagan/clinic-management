@@ -15,6 +15,7 @@ use App\Models\Clinic;
 use App\Models\Doctor;
 use App\Models\Invoice;
 use App\Models\Patient;
+use App\Models\PatientRfidPoint;
 use App\Models\Product;
 use Carbon\Carbon;
 use App\Models\Transaction;
@@ -288,6 +289,35 @@ class InvoiceResource extends Resource
                     ->columnSpanFull(),
                 Forms\Components\Section::make(trans('messages.invoices.sections.totals.title'))
                     ->schema([
+                        Forms\Components\Toggle::make('use_rfid_discount')
+                            ->label('Use RFID discount?')
+                            ->reactive(),
+                
+                        Forms\Components\TextInput::make('rfid_number')
+                            ->label('RFID Number')
+                            ->helperText('Please scan RFID on the RFID reader to retrieve the RFID #')
+                            ->extraAttributes([
+                                'onkeydown' => "if(event.key === 'Enter'){ event.preventDefault(); }"
+                            ])
+                            ->visible(fn ($get) => $get('use_rfid_discount'))
+                            ->lazy()
+                            ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
+                                // $rfidPoint = PatientRfidPoint::where('rfid_number', $get('rfid_number'))->get();
+                                $totalPoints = PatientRfidPoint::where('rfid_number', $get('rfid_number'))->sum('points');
+                                if ($totalPoints) {
+                                    $set('rfid_discount', $totalPoints);
+
+                                    $set('discount', $get('discount') + (int)$totalPoints);
+                                } else {
+                                    $set('rfid_discount', 0); // Set to 0 if no RFID points found
+                                }
+                            }),
+                        Forms\Components\TextInput::make('rfid_discount')
+                            ->label('RFID Value Discount')
+                            ->disabled()
+                            ->reactive() 
+                            ->visible(fn ($get) => $get('use_rfid_discount')),
+
                         Forms\Components\TextInput::make('shipping')
                             ->lazy()
                             ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
@@ -523,8 +553,28 @@ class InvoiceResource extends Resource
                             ->label(trans('messages.invoices.actions.amount'))
                             ->required()
                             ->numeric(),
+
+                        Forms\Components\Toggle::make('use_rfid')
+                            ->label('Retrieve points?')
+                            ->reactive(),
+
+                        Forms\Components\TextInput::make('rfid_number')
+                            ->label('RFID number')
+                            ->disabled()
+                            ->extraAttributes([
+                                'onkeydown' => "if(event.key === 'Enter'){ event.preventDefault(); }"
+                            ])
+                            ->visible(fn ($get) => $get('use_rfid_discount')),
                     ])
                     ->action(function (array $data, Invoice $record) {
+
+                        $record->rfidPoints()->create([
+                            'user_id' => $record->for_id,
+                            'rfid_number' => $data['points_rfid_number'], 
+                            'points' =>  $data['amount'] / 100,
+                            'status' => PatientRfidPoint::STATUS_ACTIVE
+                        ]);
+
                         $record->update([
                             'paid' => $record->paid + $data['amount']
                         ]);

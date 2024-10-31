@@ -34,6 +34,7 @@ class User extends Authenticatable implements FilamentUser
         'phone',
         'address',
         'avatar_url',
+        'rfid_number'
     ];
 
     PUBLIC CONST ADMIN_TYPE = 'admin';
@@ -101,6 +102,16 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasOne(DoctorDetail::class, 'user_id');
     }
     
+    public function rfidPoints(): HasMany
+    {
+        return $this->hasMany(PatientRfidPoint::class, 'user_id');
+    }
+
+    public function getRfidPointsSumAttribute()
+    {
+        return $this->rfidPoints()->sum('points') ?? 0;
+    }
+
     /**
      * Check if the user is an admin.
      *

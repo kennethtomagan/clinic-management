@@ -28,6 +28,7 @@ class DoctorController extends Controller
             ->whereHas('doctorDetail', function ($query) {
                 $query->where('status', 'active');
             })->get();
+            
         return DoctorResource::collection($doctors);
     }
 

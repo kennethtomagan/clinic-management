@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class DoctorResource extends JsonResource
 {
@@ -14,6 +15,9 @@ class DoctorResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        $result = parent::toArray($request);
+        $result['profile_image'] = $this->resource->getAvarUrl();
+        $result['clinic'] = $this->resource->doctorDetail->clinic;
+        return $result;
     }
 }

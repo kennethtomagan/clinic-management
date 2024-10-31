@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\AppointmentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Resources\AppointmentResource;
@@ -52,5 +53,14 @@ class AppointmentController extends Controller
         ]);
         
         return new AppointmentResource($newAppointment);
+    }
+
+    public function cancelAppointment(Request $request, Appointment $appointment)
+    {
+        $appointment->update([
+            'status' => AppointmentStatus::Canceled
+        ]);
+
+        return new AppointmentResource($appointment);
     }
 }

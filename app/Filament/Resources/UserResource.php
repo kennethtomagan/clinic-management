@@ -31,6 +31,7 @@ class UserResource extends Resource
         $passwordFields = static::getPasswordFields();
         $fields = static::getFields();
         $doctorFields = static::getDoctorFields();
+        $rfidField = static::getRfidField();
 
         return $form
             ->schema([
@@ -40,6 +41,11 @@ class UserResource extends Resource
                     ->relationship('doctorDetails')
                     ->schema($doctorFields)
                     ->visible(fn (callable $get) => $get('type') === 'doctor'),
+
+                Forms\Components\Section::make('RFID')
+                    ->description('If the patient has an RFID card, please scan it on the RFID reader to retrieve the RFID #')
+                    ->schema($rfidField)
+                    ->visible(fn (callable $get) => $get('type') === 'patient'),
                 Forms\Components\Section::make('Password')
                     ->schema($passwordFields)
                     ->visible(fn ($livewire) => !($livewire instanceof ViewRecord)),
@@ -126,6 +132,18 @@ class UserResource extends Resource
                 ->nullable() // Allow it to be empty as well
                 ->maxLength(255)
                 ->required(fn ($livewire) => $livewire instanceof CreateRecord),
+        ];
+    }
+
+    public static function getRfidField()
+    {
+        return [
+            Forms\Components\TextInput::make('rfid_number')
+                ->label('RFID #')
+                ->extraAttributes([
+                    'onkeydown' => "if(event.key === 'Enter'){ event.preventDefault(); }"
+                ])
+                ->maxLength(255),
         ];
     }
 
