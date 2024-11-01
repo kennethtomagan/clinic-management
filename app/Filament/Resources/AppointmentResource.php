@@ -221,6 +221,7 @@ class AppointmentResource extends Resource
                         $record->logs()->create([
                             'type' => $record->status,
                             'log' => 'Appointment cancelled By: ' . auth()->user()->name,
+                            'owner_id' => auth()->user()->id
                         ]);
                         $record->save();
                     })

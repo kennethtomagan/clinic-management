@@ -13,10 +13,16 @@ class AppointmentLog extends Model
         'appointment_id',
         'type',
         'log',
+        'owner_id'
     ];
 
     public function appointment()
     {
         return $this->belongsTo(Appointment::class, 'appointment_id');
+    }
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id');
     }
 }

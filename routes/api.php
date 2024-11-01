@@ -20,12 +20,17 @@ Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware('auth
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/auth/user', [AuthController::class, 'currentUser'])->middleware('auth:sanctum');
+    Route::get('/auth/user', [AuthController::class, 'currentUser']);
+    Route::put('/auth/user/profile', [AuthController::class, 'updateProfile']);
+    Route::put('/auth/user/update-password', [AuthController::class, 'updatePassword']);
     Route::get('/clinics', [ClinicController::class, 'index']);
     Route::get('/doctors', [DoctorController::class, 'index']);
     Route::get('/doctors/available-doctors', [DoctorController::class, 'availableDoctors']);
     Route::get('/time-slot', [TimeSlotController::class, 'index']);
+
+    // Aappointments
     Route::post('/book-appointment', [AppointmentController::class, 'store']);
     Route::get('/appointments', [AppointmentController::class, 'index']);
     Route::get('/appointments/{appointment}/cancel', [AppointmentController::class, 'cancelAppointment']);
+    Route::get('/appointments/logs', [AppointmentController::class, 'logs']);
 });

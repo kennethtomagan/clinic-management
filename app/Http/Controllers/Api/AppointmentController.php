@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Enums\AppointmentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppointmentRequest;
+use App\Http\Resources\AppointmentLogResource;
 use App\Http\Resources\AppointmentResource;
 use App\Models\Appointment;
+use App\Models\AppointmentLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -62,5 +64,18 @@ class AppointmentController extends Controller
         ]);
 
         return new AppointmentResource($appointment);
+    }
+
+
+    public function logs(Request $request)
+    {
+        $appointmentIds = Appointment::where('patient_id', $request->user()->id)
+            ->get()
+            ->pluck('id')
+            ->toArray();
+
+        $logs = AppointmentLog::with('appointment')->whereIn('appointment_id', $appointmentIds)->get();
+
+        return AppointmentLogResource::collection($logs);
     }
 }

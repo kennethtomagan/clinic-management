@@ -2,10 +2,11 @@
 
 namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class UserResource extends JsonResource
+class AppointmentLogResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,10 +15,11 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // return parent::toArray($request);
 
         $result = parent::toArray($request);
-        $result['profile_image'] = $this->resource->getAvarUrl();
+        $result['appointment'] = new AppointmentResource($this->resource->appointment);
+        $result['owner'] = new UserResource($this->resource->owner);
+        $result['created'] = $this->resource->created_at->diffForHumans();
         return $result;
     }
 }
