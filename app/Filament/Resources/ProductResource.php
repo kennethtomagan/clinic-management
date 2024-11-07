@@ -102,28 +102,27 @@ class ProductResource extends Resource
                                     ->maxLength(255)
                                     ->required(),
 
-                                Forms\Components\TextInput::make('barcode')
-                                    ->label('Barcode (ISBN, UPC, GTIN, etc.)')
-                                    ->unique(Product::class, 'barcode', ignoreRecord: true)
-                                    ->default(fn () => rand(10000000, 99999999))
-                                    ->maxLength(255)
-                                    ->disabled()
-                                    ->dehydrated()
-                                    ->required(),
-
                                 Forms\Components\TextInput::make('qty')
                                     ->label('Quantity')
                                     ->numeric()
                                     ->rules(['integer', 'min:0'])
                                     ->required(),
 
-                                Forms\Components\TextInput::make('security_stock')
-                                    ->helperText('The safety stock is the limit stock for your products which alerts you if the product stock will soon be out of stock.')
-                                    ->numeric()
-                                    ->rules(['integer', 'min:0'])
+                                Forms\Components\TextInput::make('barcode')
+                                    ->label('Barcode')
+                                    ->unique(Product::class, 'barcode', ignoreRecord: true)
+                                    ->default(fn () => rand(10000000, 99999999))
+                                    ->maxLength(255)
+                                    ->disabled()
+                                    ->dehydrated()
                                     ->required(),
+                                // Forms\Components\TextInput::make('security_stock')
+                                //     ->helperText('The safety stock is the limit stock for your products which alerts you if the product stock will soon be out of stock.')
+                                //     ->numeric()
+                                //     ->rules(['integer', 'min:0'])
+                                //     ->required(),
                             ])
-                            ->columns(2),
+                            ->columns(3),
                     ])
                     ->columnSpan(['lg' => 2]),
 

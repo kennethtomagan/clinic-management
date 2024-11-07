@@ -101,7 +101,8 @@ class Invoice extends Model
         'shipping',
         'notes',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'item_barcode'
     ];
 
     protected $casts = [

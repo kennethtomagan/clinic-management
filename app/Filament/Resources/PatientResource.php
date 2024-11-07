@@ -53,7 +53,9 @@ class PatientResource extends UserResource
                 Forms\Components\Section::make('RFID')
                     ->description('If the patient has an RFID card, please scan it on the RFID reader to retrieve the RFID #')
                     ->schema($rfidField)
-                    ->visible(fn (callable $get) => $get('type') === 'patient'),
+                    ->visible(fn (callable $get) => $get('type') === 'patient')
+                    ->columns(2)
+                    ->columnSpan(6),
                 Forms\Components\Section::make('Password')
                     ->schema($passwordFields)
                     ->visible(fn ($livewire) => !($livewire instanceof ViewRecord)),
@@ -63,7 +65,34 @@ class PatientResource extends UserResource
 
     public static function table(Table $table): Table
     {
-        return parent::table($table)->filters([
+        return parent::table($table)
+        ->columns([
+
+            Tables\Columns\ImageColumn::make('avatar_url')
+                ->label('Avatar')
+                ->getStateUsing(fn ($record) => $record->avatar_url ?? asset('images/avatar_placeholder.png'))
+                ->circular(),
+            Tables\Columns\TextColumn::make('name')
+                ->label('Full Name')
+                ->searchable(['first_name', 'last_name'])
+                ->sortable(['first_name', 'last_name']),
+
+            Tables\Columns\TextColumn::make('email')
+                ->label('Email')
+                ->searchable()
+                ->sortable(),
+
+            Tables\Columns\TextColumn::make('type')
+                ->label('User Type')
+                ->searchable()
+                ->sortable(),
+
+            Tables\Columns\TextColumn::make('rfid_points_sum')
+                ->label('RFID Points')
+                ->sortable()
+                ->getStateUsing(fn ($record) => $record->rfid_points_sum),
+        ])
+        ->filters([
             // Filter users where type is 'patient'
             \Filament\Tables\Filters\SelectFilter::make('type')
                 ->default('patient')

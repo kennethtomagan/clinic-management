@@ -15,6 +15,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class UserResource extends Resource
 {
@@ -45,7 +46,9 @@ class UserResource extends Resource
                 Forms\Components\Section::make('RFID')
                     ->description('If the patient has an RFID card, please scan it on the RFID reader to retrieve the RFID #')
                     ->schema($rfidField)
-                    ->visible(fn (callable $get) => $get('type') === 'patient'),
+                    ->visible(fn (callable $get) => $get('type') === 'patient')
+                    ->columns(2)
+                    ->columnSpan(6),
                 Forms\Components\Section::make('Password')
                     ->schema($passwordFields)
                     ->visible(fn ($livewire) => !($livewire instanceof ViewRecord)),
@@ -144,6 +147,10 @@ class UserResource extends Resource
                     'onkeydown' => "if(event.key === 'Enter'){ event.preventDefault(); }"
                 ])
                 ->maxLength(255),
+
+                Forms\Components\Placeholder::make('rfid_points_sum')
+                    ->label('RFID Points')
+                    ->content(fn (User $record): string => $record->rfid_points_sum)
         ];
     }
 
@@ -203,7 +210,6 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-
                 Tables\Columns\ImageColumn::make('avatar_url')
                     ->label('Avatar')
                     ->getStateUsing(fn ($record) => $record->avatar_url ?? asset('images/avatar_placeholder.png'))
@@ -226,6 +232,7 @@ class UserResource extends Resource
             ->filters([
                 //
             ])
+            ->query(User::query()->where('id', '!=', 1))
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
@@ -237,6 +244,7 @@ class UserResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
+                    ExportBulkAction::make()
                 ]),
             ]);
     }

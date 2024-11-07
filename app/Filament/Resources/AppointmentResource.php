@@ -169,8 +169,11 @@ class AppointmentResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('appointment_id')
+                    ->searchable()
+                    ->label('ID'),
                 Tables\Columns\ImageColumn::make('patient.avatar_url')
-                    ->label(' ')
+                    ->label('Avatar')
                     ->getStateUsing(fn ($record) => $record->patient->avatar_url ?? asset('images/avatar_placeholder.png'))
                     ->circular(),
                 Tables\Columns\TextColumn::make('patient.name')
@@ -208,6 +211,7 @@ class AppointmentResource extends Resource
                         $record->logs()->create([
                             'type' => $record->status,
                             'log' => 'Appointment confirmed By: ' . auth()->user()->name,
+                            'owner_id' => auth()->user()->id
                         ]);
                         $record->save();
                     })

@@ -70,12 +70,14 @@ class ViewInvoice extends ViewRecord
                 ])
                 ->action(function (array $data, Invoice $record) {
 
-                    $record->rfidPoints()->create([
-                        'user_id' => $record->for_id,
-                        'rfid_number' => $data['points_rfid_number'], 
-                        'points' =>  $data['amount'] / 100,
-                        'status' => PatientRfidPoint::STATUS_ACTIVE
-                    ]);
+                    if ($data['use_rfid']) {
+                        $record->rfidPoints()->create([
+                            'user_id' => $record->for_id,
+                            'rfid_number' => $data['points_rfid_number'], 
+                            'points' =>  $data['amount'] / 100,
+                            'status' => PatientRfidPoint::STATUS_ACTIVE
+                        ]);
+                    }
 
                     $record->update([
                         'paid' => $record->paid + $data['amount']

@@ -28,6 +28,7 @@ return new class extends Migration
 
             //Item
             $table->string('item')->nullable();
+            $table->string('item_barcode')->nullable();
             $table->string('description')->nullable();
             $table->string('note')->nullable();
 

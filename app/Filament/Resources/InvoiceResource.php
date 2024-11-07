@@ -11,6 +11,7 @@ use App\Filament\Resources\InvoiceResource\RelationManagers\InvoicePaymentsManag
 use App\Filament\Resources\InvoiceResource\Widgets\InvoiceStatsWidget;
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Filament\Resources\TransactionResource\RelationManagers;
+use App\Models\Appointment;
 use App\Models\Clinic;
 use App\Models\Doctor;
 use App\Models\Invoice;
@@ -19,6 +20,7 @@ use App\Models\PatientRfidPoint;
 use App\Models\Product;
 use Carbon\Carbon;
 use App\Models\Transaction;
+use App\Support\AvatarOptions;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -69,6 +71,8 @@ class InvoiceResource extends Resource
 
     public static function form(Form $form): Form
     {
+        $isEditPage = request()->routeIs('filament.resources.{resource}.edit');
+
         $types = Type::query()
             ->where('for', 'invoices')
             ->where('type', 'type');
@@ -150,10 +154,22 @@ class InvoiceResource extends Resource
                                     }
                                 })
                                 ->disabled(fn(Forms\Get $get) => !$get('for_type'))
+                                ->allowHtml()
                                 ->options(function (Forms\Get $get) {
                                     $modelClass = $get('for_type');
-                                    return $modelClass ? $modelClass::query()->pluck('name', 'id')->toArray() : [];
+                                    $users = $modelClass ? $modelClass::query()->get() : [];
+                                    if (count($users) > 0) {
+                                        return $users->mapWithKeys(function ($user) {
+                                            return [$user->getKey() => AvatarOptions::getOptionString($user)];
+                                        })->toArray();
+                                    }
+
+                                    return $users;
                                 })
+                                // ->options(function (Forms\Get $get) {
+                                //     $modelClass = $get('for_type');
+                                //     return $modelClass ? $modelClass::query()->pluck('name', 'id')->toArray() : [];
+                                // })
                                 ->columnSpanFull(),
                         ])
                         ->columns(2)
@@ -217,14 +233,35 @@ class InvoiceResource extends Resource
                     ->label(trans('messages.invoices.columns.items'))
                     ->itemLabel(trans('messages.invoices.columns.item'))
                     ->schema([
-                        Forms\Components\TextInput::make('item')
-                            ->label(trans('messages.invoices.columns.item_name'))
-                            ->columnSpan(4)
+                        Forms\Components\Select::make('item_type')
+                            ->label('Type')
+                            ->options([
+                                'Product' => 'Product',
+                                'Appointment' => 'Appointment',
+                            ])
+                            ->reactive()
+                            ->default('Product')
+                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('item_barcode')
+                            ->label('Barcode')
+                            ->columnSpan(8)
+                            ->visible(fn ($get) => $get('item_type') !== 'Appointment')
                             ->extraAttributes([
                                 'onkeydown' => "if(event.key === 'Enter'){ event.preventDefault(); }"
                             ]),
+
+                        Forms\Components\TextInput::make('appointment_id')
+                            ->label('Appointment ID')
+                            ->visible(fn ($get) => $get('item_type') == 'Appointment')
+                            ->columnSpan(8),
+
+                        Forms\Components\TextInput::make('item')
+                            ->label(fn ($get) => $get('item_type') === 'Appointment' ? 'Appointment' : 'Product Name')
+                            ->columnSpan(4),
+                            
                         Forms\Components\TextInput::make('description')
                             ->label(trans('messages.invoices.columns.description'))
+                            ->helperText('optional')
                             ->columnSpan(8),
                         Forms\Components\TextInput::make('qty')
                             ->live()
@@ -255,7 +292,7 @@ class InvoiceResource extends Resource
                             ->numeric(),
                     ])
                     ->lazy()
-                    ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
+                    ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) use ($isEditPage) {
                         $items = $get('items');
                         $total = 0;
                         $discount = 0;
@@ -264,9 +301,22 @@ class InvoiceResource extends Resource
                         
                         foreach ($items as $invoiceItem) {
 
-                            if ($invoiceItem['item']) {
-                                $product = Product::whereBarcode($invoiceItem['item'])->first();
-                                $invoiceItem['price'] =  $product->price ?? 0;
+                            if ($invoiceItem['item_barcode']) {
+                                $product = Product::whereBarcode($invoiceItem['item_barcode'])->first();
+                                if (!$invoiceItem['price'] && !$isEditPage) {
+                                    $invoiceItem['price'] =  $product->price ?? 0;
+                                }
+
+                                $invoiceItem['item'] =  $product->name ?? '';
+                            } 
+                            
+                            if ($invoiceItem['appointment_id']) {
+                                $appointment = Appointment::whereAppointmentId($invoiceItem['appointment_id'])->first();
+
+                                if ($appointment->date) {
+                                    $invoiceItem['item'] = 'Appointment date: ' . $appointment->date->format('Y-m-d');
+                                }
+                                
                             }
 
                             $getTotal = ((($invoiceItem['price'] + $invoiceItem['vat']) - $invoiceItem['discount']) * $invoiceItem['qty']);
@@ -567,13 +617,14 @@ class InvoiceResource extends Resource
                             ->visible(fn ($get) => $get('use_rfid_discount')),
                     ])
                     ->action(function (array $data, Invoice $record) {
-
-                        $record->rfidPoints()->create([
-                            'user_id' => $record->for_id,
-                            'rfid_number' => $data['points_rfid_number'], 
-                            'points' =>  $data['amount'] / 100,
-                            'status' => PatientRfidPoint::STATUS_ACTIVE
-                        ]);
+                        if ($data['use_rfid']) {
+                            $record->rfidPoints()->create([
+                                'user_id' => $record->for_id,
+                                'rfid_number' => $data['points_rfid_number'], 
+                                'points' =>  $data['amount'] / 100,
+                                'status' => PatientRfidPoint::STATUS_ACTIVE
+                            ]);
+                        }
 
                         $record->update([
                             'paid' => $record->paid + $data['amount']
