@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\PatienResource\RelationManagers\MedicalRecordsRelationManager;
 use App\Filament\Resources\PatientResource\Pages;
 use App\Filament\Resources\PatientResource\RelationManagers;
 use App\Models\Patient;
@@ -54,8 +55,7 @@ class PatientResource extends UserResource
                     ->description('If the patient has an RFID card, please scan it on the RFID reader to retrieve the RFID #')
                     ->schema($rfidField)
                     ->visible(fn (callable $get) => $get('type') === 'patient')
-                    ->columns(2)
-                    ->columnSpan(6),
+                    ->columns(2),
                 Forms\Components\Section::make('Password')
                     ->schema($passwordFields)
                     ->visible(fn ($livewire) => !($livewire instanceof ViewRecord)),
@@ -119,7 +119,7 @@ class PatientResource extends UserResource
     public static function getRelations(): array
     {
         return [
-            //
+            MedicalRecordsRelationManager::class
         ];
     }
 
@@ -128,7 +128,7 @@ class PatientResource extends UserResource
         return [
             'index' => Pages\ListPatients::route('/'),
             'create' => Pages\CreatePatient::route('/create'),
-            'view' => Pages\ViewPatient::route('/{record}'),
+            // 'view' => Pages\ViewPatient::route('/{record}/show'),
             'edit' => Pages\EditPatient::route('/{record}/edit'),
         ];
     }

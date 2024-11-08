@@ -112,6 +112,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->rfidPoints()->sum('points') ?? 0;
     }
 
+    public function medicalRecords(): HasMany
+    {
+        return $this->hasMany(Health::class, 'patient_id');
+    }
+
     /**
      * Check if the user is an admin.
      *

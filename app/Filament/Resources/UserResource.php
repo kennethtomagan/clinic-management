@@ -9,6 +9,7 @@ use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -47,8 +48,7 @@ class UserResource extends Resource
                     ->description('If the patient has an RFID card, please scan it on the RFID reader to retrieve the RFID #')
                     ->schema($rfidField)
                     ->visible(fn (callable $get) => $get('type') === 'patient')
-                    ->columns(2)
-                    ->columnSpan(6),
+                    ->columns(2),
                 Forms\Components\Section::make('Password')
                     ->schema($passwordFields)
                     ->visible(fn ($livewire) => !($livewire instanceof ViewRecord)),
@@ -126,7 +126,8 @@ class UserResource extends Resource
                     fn ($livewire) => $livewire instanceof CreateRecord 
                     ? ''
                     : 'Leave empty if you do not want to change the password'
-                ),
+                )
+                ->visible(fn ($livewire) => !($livewire instanceof ViewRecord)),
 
             Forms\Components\TextInput::make('password_confirmation')
                 ->password()
@@ -134,7 +135,8 @@ class UserResource extends Resource
                 ->same('password') // Ensure it matches the password field
                 ->nullable() // Allow it to be empty as well
                 ->maxLength(255)
-                ->required(fn ($livewire) => $livewire instanceof CreateRecord),
+                ->required(fn ($livewire) => $livewire instanceof CreateRecord)
+                ->visible(fn ($livewire) => !($livewire instanceof ViewRecord) || !($livewire instanceof ListRecords)),
         ];
     }
 
@@ -148,9 +150,8 @@ class UserResource extends Resource
                 ])
                 ->maxLength(255),
 
-                Forms\Components\Placeholder::make('rfid_points_sum')
-                    ->label('RFID Points')
-                    ->content(fn (User $record): string => $record->rfid_points_sum)
+            Forms\Components\Placeholder::make('rfid_points_sum')
+                ->label('RFID Points')
         ];
     }
 
@@ -234,7 +235,7 @@ class UserResource extends Resource
             ])
             ->query(User::query()->where('id', '!=', 1))
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\RestoreAction::make(),
