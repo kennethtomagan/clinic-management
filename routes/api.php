@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\TimeSlotController;
+use App\Http\Controllers\Api\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/auth/user/update-password', [AuthController::class, 'updatePassword']);
     Route::get('/clinics', [ClinicController::class, 'index']);
     Route::get('/time-slot', [TimeSlotController::class, 'index']);
+    Route::get('/dashboard-counts',[DashboardController::class, 'getCounts']);
 
     // Aappointments
     Route::post('/book-appointment', [AppointmentController::class, 'store']);
