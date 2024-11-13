@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Doctor extends Model
+class Doctor extends User
 {
 
     protected $table = 'users';
@@ -18,8 +18,8 @@ class Doctor extends Model
     // You can define a global scope to filter by 'type'
     protected static function booted()
     {
-        static::addGlobalScope('patient', function ($query) {
-            $query->where('type', 'doctor');
+        static::addGlobalScope('doctor', function ($query) {
+            $query->where('type', User::DOCTOR_TYPE);
         });
     }
 }

@@ -233,9 +233,9 @@ class UserResource extends Resource
             ->filters([
                 //
             ])
-            ->query(User::query()->where('id', '!=', 1))
+            // ->query(User::query()->where('id', '!=', 1))
             ->actions([
-                // Tables\Actions\ViewAction::make(),
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\RestoreAction::make(),

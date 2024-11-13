@@ -165,9 +165,30 @@ class AppointmentResource extends Resource
             ]);
     }
 
+    public static function getTableQuery(): Builder
+    {
+        $query = static::getModel()::query();
+    
+        // Apply filter if the authenticated user's type is not 'admin'
+        if (!auth()->user()->isAdminOrReceptionist) {
+            $query->where('patient_id', auth()->user()->id);
+        }
+    
+        return $query;
+    }
+
     public static function table(Table $table): Table
     {
+        $query = static::getModel()::query();
+
+        // Apply filter if the authenticated user's type is not 'admin'
+        if (!auth()->user()->isAdminOrReceptionist()) {
+            $query->where('patient_id', auth()->user()->id);
+        }
+
         return $table
+
+            ->query($query)
             ->columns([
                 Tables\Columns\TextColumn::make('appointment_id')
                     ->searchable()
@@ -215,7 +236,7 @@ class AppointmentResource extends Resource
                         ]);
                         $record->save();
                     })
-                    ->visible(fn (Appointment $record) => $record->status == AppointmentStatus::Pending)
+                    ->visible(fn (Appointment $record) => $record->status == AppointmentStatus::Pending && auth()->user()->isAdminOrReceptionist())
                     ->color('success')
                     ->icon('heroicon-o-check'),
                 Tables\Actions\Action::make('Cancel')
@@ -229,7 +250,7 @@ class AppointmentResource extends Resource
                         ]);
                         $record->save();
                     })
-                    ->visible(fn (Appointment $record) => $record->status != AppointmentStatus::Canceled)
+                    ->visible(fn (Appointment $record) => $record->status != AppointmentStatus::Canceled && auth()->user()->isAdminOrReceptionist())
                     ->color('danger')
                     ->icon('heroicon-o-x-mark'),
                 Tables\Actions\ViewAction::make(),

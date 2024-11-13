@@ -156,4 +156,10 @@ class User extends Authenticatable implements FilamentUser
         return url('images/avatar_placeholder.png'); 
     }
 
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->getAvarUrl();
+    }
+
 }
