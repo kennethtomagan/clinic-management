@@ -118,7 +118,7 @@ class InvoiceResource extends Resource
                                     $modelClass = $get('from_type');
                                     return $modelClass ? $modelClass::query()->pluck('name', 'id')->toArray() : [];
                                 })
-                                ->default(1)
+                                ->default(Clinic::first()->id)
                                 ->columnSpanFull(),
                         ])
                         ->columns(2)
@@ -608,13 +608,12 @@ class InvoiceResource extends Resource
                             ->label('Retrieve points?')
                             ->reactive(),
 
-                        Forms\Components\TextInput::make('rfid_number')
+                        Forms\Components\TextInput::make('points_rfid_number')
                             ->label('RFID number')
-                            ->disabled()
                             ->extraAttributes([
                                 'onkeydown' => "if(event.key === 'Enter'){ event.preventDefault(); }"
                             ])
-                            ->visible(fn ($get) => $get('use_rfid_discount')),
+                            ->visible(fn ($get) => $get('use_rfid')),
                     ])
                     ->action(function (array $data, Invoice $record) {
                         if ($data['use_rfid']) {

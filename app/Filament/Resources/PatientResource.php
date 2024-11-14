@@ -90,7 +90,8 @@ class PatientResource extends UserResource
             Tables\Columns\TextColumn::make('rfid_points_sum')
                 ->label('RFID Points')
                 ->sortable()
-                ->getStateUsing(fn ($record) => $record->rfid_points_sum),
+                ->getStateUsing(fn ($record) => $record->rfidPoints->sum('points'))
+                // ->getStateUsing(fn ($record) => $record->rfid_points_sum),
         ])
         ->filters([
             // Filter users where type is 'patient'

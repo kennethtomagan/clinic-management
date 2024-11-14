@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Clinic extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -28,9 +31,9 @@ class Clinic extends Model
                     ->where('type', 'doctor');
     }
 
-    public function schedules(): BelongsToMany
+    public function schedules(): HasMany
     {
-        return $this->belongsToMany(Schedule::class);
+        return $this->hasMany(Schedule::class);
     }
 
     public function doctorDetails()

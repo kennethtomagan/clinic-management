@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('zip');
             $table->string('phone');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

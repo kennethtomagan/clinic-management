@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(Doctor::class, 'doctor_id');
             $table->unsignedTinyInteger('day_of_week')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

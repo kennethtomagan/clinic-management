@@ -8,14 +8,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements FilamentUser
 {
     use HasFactory, Notifiable, HasApiTokens;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -107,10 +110,28 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(PatientRfidPoint::class, 'user_id');
     }
 
-    public function getRfidPointsSumAttribute()
+    /**
+     * Get the user's first name.
+     */
+    protected function firstName()
     {
+        return 123;
+    }
+    
+    public function rfidPointsSumAttribute()
+    {
+
         return $this->rfidPoints()->sum('points') ?? 0;
     }
+    /**
+     * Get the user's first name.
+     */
+    // protected function rfidPointsSum(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: fn (string $value) => $this->rfidPoints()->sum('points') ?? 0,
+    //     );
+    // }
 
     public function medicalRecords(): HasMany
     {

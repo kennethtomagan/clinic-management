@@ -148,10 +148,8 @@ class UserResource extends Resource
                 ->extraAttributes([
                     'onkeydown' => "if(event.key === 'Enter'){ event.preventDefault(); }"
                 ])
-                ->maxLength(255),
-
-            Forms\Components\Placeholder::make('rfid_points_sum')
-                ->label('RFID Points')
+                ->columnSpanFull()
+                ->maxLength(255)
         ];
     }
 

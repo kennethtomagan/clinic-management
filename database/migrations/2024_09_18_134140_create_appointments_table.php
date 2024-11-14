@@ -27,6 +27,7 @@ return new class extends Migration
             $table->foreignIdFor(Slot::class);
             $table->foreignIdFor(Clinic::class);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
