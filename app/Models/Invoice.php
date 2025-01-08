@@ -102,7 +102,10 @@ class Invoice extends Model
         'notes',
         'created_at',
         'updated_at',
-        'item_barcode'
+        'item_barcode',
+        'use_rfid_discount',
+        'rfid_number',
+        'rfid_discount',
     ];
 
     protected $casts = [

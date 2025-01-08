@@ -327,13 +327,12 @@ class InvoiceResource extends Resource
 
                             $collectItems[] = $invoiceItem;
                         }
+                        $discount = $discount + (int) $get('rfid_discount');
                         $set('total', $total);
                         $set('discount', $discount);
                         $set('vat', $vat);
 
                         $set('items', $collectItems);
-
-                        
                     })
                     ->columns(12)
                     ->columnSpanFull(),
@@ -356,8 +355,9 @@ class InvoiceResource extends Resource
                                 $totalPoints = PatientRfidPoint::where('rfid_number', $get('rfid_number'))->sum('points');
                                 if ($totalPoints) {
                                     $set('rfid_discount', $totalPoints);
-
-                                    $set('discount', $get('discount') + (int)$totalPoints);
+                                    $totalDiscount = (int) $get('discount') + (int) $totalPoints;
+                                    $set('discount', $totalDiscount);
+                                    $set('total', $get('total') - (int) $totalPoints);
                                 } else {
                                     $set('rfid_discount', 0); // Set to 0 if no RFID points found
                                 }
@@ -365,6 +365,7 @@ class InvoiceResource extends Resource
                         Forms\Components\TextInput::make('rfid_discount')
                             ->label('RFID Value Discount')
                             ->disabled()
+                            ->dehydrated()
                             ->reactive() 
                             ->visible(fn ($get) => $get('use_rfid_discount')),
 
@@ -389,11 +390,13 @@ class InvoiceResource extends Resource
                             ->default(0),
                         Forms\Components\TextInput::make('discount')
                             ->disabled()
+                            ->dehydrated()
                             ->label(trans('messages.invoices.columns.discount'))
                             ->numeric()
                             ->default(0),
                         Forms\Components\TextInput::make('total')
                             ->disabled()
+                            ->dehydrated()
                             ->label(trans('messages.invoices.columns.total'))
                             ->numeric()
                             ->default(0),

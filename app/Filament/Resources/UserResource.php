@@ -47,7 +47,6 @@ class UserResource extends Resource
                 Forms\Components\Section::make('RFID')
                     ->description('If the patient has an RFID card, please scan it on the RFID reader to retrieve the RFID #')
                     ->schema($rfidField)
-                    ->visible(fn (callable $get) => $get('type') === 'patient')
                     ->columns(2),
                 Forms\Components\Section::make('Password')
                     ->schema($passwordFields)

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use App\Filament\Resources\InvoiceResource;
+use App\Models\PatientRfidPoint;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
@@ -19,13 +20,17 @@ class CreateInvoice extends CreateRecord
     public function afterCreate()
     {
         $data = [];
-        $data['discount'] = collect($this->getRecord()->invoicesItems)->sum(function ($item) {
-            return $item->discount * $item->qty;
-        });
+        // $data['discount'] = collect($this->getRecord()->invoicesItems)->sum(function ($item) {
+        //     return $item->discount * $item->qty;
+        // });
         $data['vat'] = collect($this->getRecord()->invoicesItems)->sum(function ($item) {
             return $item->vat * $item->qty;
         });
-        $data['total'] = collect($this->getRecord()->invoicesItems)->sum('total');
+        // $data['total'] = collect($this->getRecord()->invoicesItems)->sum('total');
+
+        if (!empty($this->data['use_rfid_discount']) && $this->data['use_rfid_discount'] == true && !empty($this->data['rfid_number'])) {
+            $rfidPoints = PatientRfidPoint::where('rfid_number', $this->data['rfid_number'])->delete();
+        }
 
         $this->getRecord()->update($data);
 
