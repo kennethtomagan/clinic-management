@@ -149,6 +149,27 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * Check if the user is an admin.
+     *
+     * @return bool
+     */
+    public function isPatient(): bool
+    {
+        return $this->type === self::PATIENT_TYPE;
+    }
+
+    /**
+     * Check if the user is an admin.
+     *
+     * @return bool
+     */
+    public function isDoctor(): bool
+    {
+        return $this->type === self::DOCTOR_TYPE;
+    }
+
+
+    /**
      * Check if the user is either an admin or receptionist.
      *
      * @return bool

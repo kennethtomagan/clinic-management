@@ -50,97 +50,103 @@ class MedicalResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Forms\Components\Section::make([
-                    Forms\Components\Select::make('patient_id')
-                        ->label('Patient')
-                        ->allowHtml()
-                        ->searchable()
-                        ->required()
-                        ->columnSpan(6)
-                        ->getSearchResultsUsing(function (string $search) {
-                            $patient = User::where('type', User::PATIENT_TYPE)
-                                ->where(function ($query) use ($search) {
-                                    $query->where('first_name', 'like', "%{$search}%")
-                                        ->orWhere('last_name', 'like', "%{$search}%");
-                                })
-                                ->limit(50)
-                                ->get();
-                        
-                            return $patient->mapWithKeys(function ($patient) {
-                                    return [$patient->getKey() => AvatarOptions::getOptionString($patient)];
-                            })->toArray();
-                        })
-                        ->options(function (): array {
-                            $patients = User::where('type', User::PATIENT_TYPE)->get();
+            ->schema(self::getFormFields());
+    }
 
-                            return $patients->mapWithKeys(function ($patient) {
-                                return [$patient->getKey() => AvatarOptions::getOptionString($patient)];
-                            })->toArray();
-                        }),
+    public static function getFormFields($patientId = null)
+    {
+        return [
+            Forms\Components\Section::make([
+                Forms\Components\Select::make('patient_id')
+                    ->label('Patient')
+                    ->allowHtml()
+                    ->searchable()
+                    ->required()
+                    ->columnSpan(6)
+                    ->default($patientId)
+                    ->getSearchResultsUsing(function (string $search) {
+                        $patient = User::where('type', User::PATIENT_TYPE)
+                            ->where(function ($query) use ($search) {
+                                $query->where('first_name', 'like', "%{$search}%")
+                                    ->orWhere('last_name', 'like', "%{$search}%");
+                            })
+                            ->limit(50)
+                            ->get();
                     
-                    Forms\Components\Select::make('doctor_id')
-                        ->label('Doctor')
-                        ->allowHtml()
-                        ->columnSpan(6)
-                        ->required()
-                        ->options(function (Get $get) {
-                            $doctors = User::where('type', User::DOCTOR_TYPE)->get();
-                            return $doctors->mapWithKeys(function ($doctor) {
-                                return [$doctor->getKey() => AvatarOptions::getOptionString($doctor)];
-                            })->toArray();
-                        })
-                        ->native(false),
+                        return $patient->mapWithKeys(function ($patient) {
+                                return [$patient->getKey() => AvatarOptions::getOptionString($patient)];
+                        })->toArray();
+                    })
+                    ->options(function (): array {
+                        $patients = User::where('type', User::PATIENT_TYPE)->get();
 
-                    Forms\Components\Select::make('clinic_id')
-                        ->relationship('clinic', 'name')
-                        ->preload()
-                        ->required()
-                        ->searchable()
-                        ->columnSpan(6),
+                        return $patients->mapWithKeys(function ($patient) {
+                            return [$patient->getKey() => AvatarOptions::getOptionString($patient)];
+                        })->toArray();
+                    }),
+                
+                Forms\Components\Select::make('doctor_id')
+                    ->label('Doctor')
+                    ->allowHtml()
+                    ->columnSpan(6)
+                    ->required()
+                    ->options(function (Get $get) {
+                        $doctors = User::where('type', User::DOCTOR_TYPE)->get();
+                        return $doctors->mapWithKeys(function ($doctor) {
+                            return [$doctor->getKey() => AvatarOptions::getOptionString($doctor)];
+                        })->toArray();
+                    })
+                    ->native(false),
 
-                    Forms\Components\DatePicker::make('checkup_date')
-                        ->label('Check-up date')
-                        ->native(false)
-                        ->displayFormat('M d, Y')
-                        ->closeOnDateSelection()
-                        ->default(Carbon::now())
-                        ->required()
-                        ->columnSpan(6),
+                Forms\Components\Select::make('clinic_id')
+                    ->relationship('clinic', 'name')
+                    ->preload()
+                    ->required()
+                    ->searchable()
+                    ->columnSpan(6),
 
-                ])
-                ->columns(12)
-                ->columnSpanFull(),
+                Forms\Components\DatePicker::make('checkup_date')
+                    ->label('Check-up date')
+                    ->native(false)
+                    ->displayFormat('M d, Y')
+                    ->closeOnDateSelection()
+                    ->default(Carbon::now())
+                    ->required()
+                    ->columnSpan(6),
 
-                Forms\Components\Section::make('Health records')
-                ->schema([
-                    Forms\Components\TextInput::make('vision_right_eye')
-                        ->label('Vision righ eye')
-                        ->required()
-                        ->placeholder('20/20')
-                        ->columnSpan(6),
+            ])
+            ->columns(12)
+            ->columnSpanFull(),
 
-                    Forms\Components\TextInput::make('vision_left_eye')
-                        ->label('Vision left eye')
-                        ->required()
-                        ->placeholder('20/20')
-                        ->columnSpan(6),
+            Forms\Components\Section::make('Health records')
+            ->schema([
+                Forms\Components\TextInput::make('vision_right_eye')
+                    ->label('Vision righ eye')
+                    ->required()
+                    ->placeholder('20/20')
+                    ->columnSpan(6),
 
-                    Forms\Components\Textarea::make('diagnosis')
-                        ->label('Diagnosis')
-                        ->required()
-                        ->columnSpanFull(),
+                Forms\Components\TextInput::make('vision_left_eye')
+                    ->label('Vision left eye')
+                    ->required()
+                    ->placeholder('20/20')
+                    ->columnSpan(6),
 
-                    Forms\Components\Textarea::make('recommendations')
-                        ->columnSpanFull(),
+                Forms\Components\Textarea::make('diagnosis')
+                    ->label('Diagnosis')
+                    ->required()
+                    ->columnSpanFull(),
 
-                    Forms\Components\Textarea::make('notes')
-                        ->columnSpanFull(),
-                ])
-                ->columns(12)
-                ->columnSpanFull(),
+                Forms\Components\Textarea::make('recommendations')
+                    ->columnSpanFull(),
 
-            ]);
+                Forms\Components\Textarea::make('notes')
+                    ->columnSpanFull(),
+            ])
+            ->columns(12)
+            ->columnSpanFull(),
+
+        ];
     }
 
     public static function table(Table $table): Table

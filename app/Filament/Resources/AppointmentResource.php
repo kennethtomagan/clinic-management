@@ -165,25 +165,15 @@ class AppointmentResource extends Resource
             ]);
     }
 
-    public static function getTableQuery(): Builder
-    {
-        $query = static::getModel()::query();
-    
-        // Apply filter if the authenticated user's type is not 'admin'
-        if (!auth()->user()->isAdminOrReceptionist) {
-            $query->where('patient_id', auth()->user()->id);
-        }
-    
-        return $query;
-    }
-
     public static function table(Table $table): Table
     {
         $query = static::getModel()::query();
 
         // Apply filter if the authenticated user's type is not 'admin'
-        if (!auth()->user()->isAdminOrReceptionist()) {
+        if (auth()->user()->isPatient()) {
             $query->where('patient_id', auth()->user()->id);
+        } elseif (auth()->user()->isDoctor()) {
+            $query->where('doctor_id', auth()->user()->id);
         }
 
         return $table

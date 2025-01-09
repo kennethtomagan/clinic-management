@@ -22,6 +22,7 @@ use Carbon\Carbon;
 use App\Models\Transaction;
 use App\Support\AvatarOptions;
 use Filament\Forms;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -258,7 +259,9 @@ class InvoiceResource extends Resource
                         Forms\Components\TextInput::make('item')
                             ->label(fn ($get) => $get('item_type') === 'Appointment' ? 'Appointment' : 'Product Name')
                             ->columnSpan(4),
-                            
+
+                        Hidden::make('item_id'),
+
                         Forms\Components\TextInput::make('description')
                             ->label(trans('messages.invoices.columns.description'))
                             ->helperText('optional')
@@ -308,6 +311,7 @@ class InvoiceResource extends Resource
                                 }
 
                                 $invoiceItem['item'] =  $product->name ?? '';
+                                $invoiceItem['item_id'] =  $product->id;
                             } 
                             
                             if ($invoiceItem['appointment_id']) {
@@ -316,6 +320,7 @@ class InvoiceResource extends Resource
                                 if ($appointment->date) {
                                     $invoiceItem['item'] = 'Appointment date: ' . $appointment->date->format('Y-m-d');
                                 }
+                                $invoiceItem['item_id'] =  $appointment->id;
                                 
                             }
 
@@ -351,7 +356,6 @@ class InvoiceResource extends Resource
                             ->visible(fn ($get) => $get('use_rfid_discount'))
                             ->lazy()
                             ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
-                                // $rfidPoint = PatientRfidPoint::where('rfid_number', $get('rfid_number'))->get();
                                 $totalPoints = PatientRfidPoint::where('rfid_number', $get('rfid_number'))->sum('points');
                                 if ($totalPoints) {
                                     $set('rfid_discount', $totalPoints);
@@ -647,6 +651,14 @@ class InvoiceResource extends Resource
                                 'status' => 'paid'
                             ]);
                         }
+
+                        $record->invoicesItems()
+                            ->where('item_type', 'Product')
+                            ->get()
+                            ->each(function ($item) {
+                                Product::where('id', $item->item_id)
+                                    ->decrement('qty', $item->qty);
+                            });
 
                         Notification::make()
                             ->title(trans('messages.invoices.actions.pay.notification.title'))

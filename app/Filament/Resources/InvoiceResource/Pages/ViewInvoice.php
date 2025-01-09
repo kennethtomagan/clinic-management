@@ -5,6 +5,7 @@ namespace App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource;
 use App\Models\Invoice;
 use App\Models\PatientRfidPoint;
+use App\Models\Product;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions;
 use Filament\Forms;
@@ -93,11 +94,20 @@ class ViewInvoice extends ViewRecord
                         'type' => 'payment',
                     ]);
 
+
                     if ($record->total === $record->paid) {
                         $record->update([
                             'status' => 'paid'
                         ]);
                     }
+
+                    $record->invoicesItems()
+                        ->where('item_type', 'Product')
+                        ->get()
+                        ->each(function ($item) {
+                            Product::where('id', $item->item_id)
+                                ->decrement('qty', $item->qty);
+                        });
 
                     Notification::make()
                         ->title(trans('messages.invoices.actions.pay.notification.title'))

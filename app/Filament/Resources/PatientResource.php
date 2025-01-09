@@ -17,6 +17,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Pages\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 
 
 class PatientResource extends UserResource
@@ -30,6 +32,8 @@ class PatientResource extends UserResource
     protected static ?string $navigationLabel = 'Patients';
 
     public static ?string $label = 'Patient';
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function form(Form $form): Form
     {
@@ -117,20 +121,31 @@ class PatientResource extends UserResource
         ;
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            MedicalRecordsRelationManager::class
-        ];
-    }
+    // public static function getRelations(): array
+    // {
+    //     return [
+    //         MedicalRecordsRelationManager::class
+    //     ];
+    // }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListPatients::route('/'),
             'create' => Pages\CreatePatient::route('/create'),
-            // 'view' => Pages\ViewPatient::route('/{record}/show'),
+            'view' => Pages\ViewPatient::route('/{record}/show'),
             'edit' => Pages\EditPatient::route('/{record}/edit'),
+            'medical-records' =>Pages\ManageMedicalRecords::route('/{record}/medical-records'),
         ];
     }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\ViewPatient::class,
+            Pages\EditPatient::class,
+            Pages\ManageMedicalRecords::class,
+        ]);
+    }
+    
 }

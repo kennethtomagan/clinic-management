@@ -10,10 +10,4 @@ class EditPatient extends EditRecord
 {
     protected static string $resource = PatientResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\DeleteAction::make(),
-        ];
-    }
 }

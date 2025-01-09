@@ -39,6 +39,7 @@ class DoctorResource extends UserResource
         // Get the common fields from UserResource
         $fields = UserResource::getFields();
         $doctorFields = UserResource::getDoctorFields();
+        $rfidField = UserResource::getRfidField();
 
         // Override the 'type' field
         foreach ($fields as &$field) {
@@ -57,6 +58,11 @@ class DoctorResource extends UserResource
                     ->visible(fn (callable $get) => $get('type') === USER::DOCTOR_TYPE)
                     ->relationship('doctorDetails')
                     ->schema($doctorFields),
+
+                Forms\Components\Section::make('RFID')
+                    ->description('If the patient has an RFID card, please scan it on the RFID reader to retrieve the RFID #')
+                    ->schema($rfidField)
+                    ->columns(2),
                 Forms\Components\Section::make('Password')
                     ->schema(UserResource::getPasswordFields())
                     ->visible(fn ($livewire) => !($livewire instanceof ViewRecord)),

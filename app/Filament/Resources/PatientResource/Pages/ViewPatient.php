@@ -10,11 +10,12 @@ class ViewPatient extends ViewRecord
 {
     protected static string $resource = PatientResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\EditAction::make()->icon('heroicon-o-pencil'),
-            Actions\DeleteAction::make()->icon('heroicon-o-trash'),
-        ];
-    }
+    // protected function getHeaderActions(): array
+    // {
+    //     return [
+    //         Actions\EditAction::make()->icon('heroicon-o-pencil'),
+    //         Actions\DeleteAction::make()->icon('heroicon-o-trash'),
+    //     ];
+    // }
+
 }
